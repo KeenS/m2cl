@@ -4,7 +4,7 @@
   :author "Nicolas Martyanoff"
   :license "BSD"
   :description "A handler for the mongrel2 HTTP server."
-  :depends-on (:babel :cl-json :cl-ppcre :flexi-streams
+  :depends-on (:babel :cl-json :cl-ppcre :flexi-streams :salza2
                (:version :zmq "1.1.0"))
   :in-order-to ((test-op (load-op m2cl-test)))
   :components ((:module "src"

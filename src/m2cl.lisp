@@ -281,11 +281,27 @@ it, and return the request it contains."
                           uuid connections request
                           (code 200) (status "OK")
                           (headers (list))
-                          binary-body-p)
-  (let ((body (if binary-body-p
-                  body
-                  (babel:string-to-octets body))))
-    (handler-send handler (http-format body code status headers)
+                          binary-body-p
+                          compress)
+  (let* ((binary-body (if binary-body-p
+                          body
+                          (babel:string-to-octets body)))
+         (final-body (cond
+                       ((null compress)
+                        binary-body)
+                       ((eq compress :gzip)
+                        (salza2:compress-data
+                         binary-body 'salza2:gzip-compressor))
+                       ((eq compress :deflate)
+                        (salza2:compress-data
+                         binary-body 'salza2:zlib-compressor)))))
+    (when compress
+      (push (cons "Content-Encoding"
+                  (ecase compress
+                    (:gzip "gzip")
+                    (:deflate "deflate")))
+            headers))
+    (handler-send handler (http-format final-body code status headers)
                   :uuid uuid
                   :connections connections
                   :request request)))
